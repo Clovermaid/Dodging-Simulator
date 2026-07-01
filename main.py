@@ -8,6 +8,13 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Dodging Simulator - Refactored")
+pygame.font.init()
+# Use a clean system font, size 30
+game_font = pygame.font.SysFont(None, 30)
+
+# Track the starting time using Pygame's internal millisecond clock
+start_time = pygame.time.get_ticks()
+
 
 clock = pygame.time.Clock()
 player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
@@ -50,6 +57,8 @@ while running:
         for obstacle in obstacle_group:
             if obstacle.rect.y > SCREEN_HEIGHT:
                 obstacle.kill() # .kill() instantly deletes it from all sprite groups!
+        current_time = pygame.time.get_ticks()
+        score_seconds = (current_time - start_time) // 1000
 
     # --- DRAWING ---
     screen.fill((30, 30, 30)) 
@@ -57,7 +66,21 @@ while running:
     # 4. Automatically blit every single obstacle's surface using their rects!
     obstacle_group.draw(screen)
     
-    screen.blit(player.image, player.rect) 
+    screen.blit(player.image, player.rect)
+    # Create the text image surface (White text)
+    score_text = f"Time Survived: {score_seconds}s"
+    text_surface = game_font.render(score_text, True, (255, 255, 255))
+
+    # Draw it at coordinates X=20, Y=20 (Top left corner)
+    screen.blit(text_surface, (20, 20))
+
+    # If it's Game Over, draw a big red message in the center!
+    if game_over:
+        over_surface = game_font.render("GAME OVER! Press Esc to Close", True, (255, 50, 50))
+        end_score = game_font.render(f"You have survived {score_seconds} seconds", True, (255, 50, 50))
+        screen.blit(over_surface, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
+        screen.blit(end_score, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 + 50))
+
     
     pygame.display.flip()
     clock.tick(60)
